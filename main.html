@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+
+</head>
+
+<body style='margin: 0px'>
+    <div id='map' style='width: 100vw; height: 100vh;'></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZmVsaXhhZXRlbSIsImEiOiI2MmE4YmQ4YjIzOTI2YjY3ZWFmNzUwOTU5NzliOTAxOCJ9.nshlehFGmK_6YmZarM2SHA';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v9'
+        });
+
+        // When a click event occurs on a feature in the places layer, open a popup at the
+        // location of the feature, with description HTML from its properties.
+        map.on('click', function (e) {
+            console.log(e.lngLat)
+            const url = `/countryName`;
+            const query = `
+            {
+                point(latitude: ${e.lngLat.lat}, longitude: ${e.lngLat.lng}) { 
+                name
+                } 
+            }
+            `
+            fetch(`${url}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                new mapboxgl.Popup().setLngLat(e.lngLat).setHTML(data.data.point.name).addTo(map);
+            });
+            
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+        map.on('mouseenter', 'places', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+        map.on('mouseleave', 'places', function () {
+            map.getCanvas().style.cursor = '';
+        });
+    </script>
+
+</body>
+
+</html>
